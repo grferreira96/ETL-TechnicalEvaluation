@@ -80,18 +80,18 @@ def transformMetrics(payments_df, clientes_df):
         finalPagamento = row['dataDoPagamento'] + pd.DateOffset(months=month_iterator-1)
         valor = row['valor']
 
-        clientes_df.at[row['clienteID'], constants.CLIENTE_REINDEX[4]] = clientes_df.loc[row['clienteID']][constants.CLIENTE_REINDEX[4]] + 1
+        clientes_df.at[row['clienteID'], 'numeroDeContratos'] = clientes_df.loc[row['clienteID']]['numeroDeContratos'] + 1
         
         for i in range(initialMonth-1, (initialMonth + month_iterator)-1):
-            if clientes_df.loc[row['clienteID']][constants.CLIENTE_REINDEX[0]] > row['dataDoPagamento']:
-                clientes_df.at[row['clienteID'], constants.CLIENTE_REINDEX[0]] = row['dataDoPagamento']
+            if clientes_df.loc[row['clienteID']]['dataDeEntrada'] > row['dataDoPagamento']:
+                clientes_df.at[row['clienteID'], 'dataDeEntrada'] = row['dataDoPagamento']
 
-            clientes_df.at[row['clienteID'], constants.CLIENTE_REINDEX[1]] = True
+            clientes_df.at[row['clienteID'], 'teveContrato'] = True
 
-            if clientes_df.loc[row['clienteID']][constants.CLIENTE_REINDEX[2]] < row['dataDoPagamento']:
-                clientes_df.at[row['clienteID'], constants.CLIENTE_REINDEX[2]] = row['dataDoPagamento']
-            if clientes_df.loc[row['clienteID']][constants.CLIENTE_REINDEX[3]] < finalPagamento:
-                clientes_df.at[row['clienteID'], constants.CLIENTE_REINDEX[3]] = finalPagamento
+            if clientes_df.loc[row['clienteID']]['ultimoContrato'] < row['dataDoPagamento']:
+                clientes_df.at[row['clienteID'], 'ultimoContrato'] = row['dataDoPagamento']
+            if clientes_df.loc[row['clienteID']]['ultimoPagamento'] < finalPagamento:
+                clientes_df.at[row['clienteID'], 'ultimoPagamento'] = finalPagamento
 
             item = [
                 index,
@@ -112,10 +112,10 @@ def transformMetrics(payments_df, clientes_df):
 
 def reindexingClient(clientes_df):
     clientes_df = clientes_df.reindex(columns=clientes_df.columns.tolist() + constants.CLIENTE_REINDEX)
-    clientes_df[constants.CLIENTE_REINDEX[0]] = pd.to_datetime(pd.Timestamp.max, format='%d/%m/%Y')
-    clientes_df[constants.CLIENTE_REINDEX[1]] = False
-    clientes_df[constants.CLIENTE_REINDEX[2]] = pd.to_datetime(pd.Timestamp.min, format='%d/%m/%Y')
-    clientes_df[constants.CLIENTE_REINDEX[3]] = pd.to_datetime(pd.Timestamp.min, format='%d/%m/%Y')
-    clientes_df[constants.CLIENTE_REINDEX[4]] = 0
+    clientes_df['dataDeEntrada'] = pd.to_datetime(pd.Timestamp.max, format='%d/%m/%Y')
+    clientes_df['teveContrato'] = False
+    clientes_df['ultimoContrato'] = pd.to_datetime(pd.Timestamp.min, format='%d/%m/%Y')
+    clientes_df['ultimoPagamento'] = pd.to_datetime(pd.Timestamp.min, format='%d/%m/%Y')
+    clientes_df['numeroDeContratos'] = 0
 
     return clientes_df
